@@ -26,6 +26,25 @@ class NeuralNetwork {
             this.output_nodes)
     }
 
+    mutate(rate) {
+        const weights = this.model.getWeights();
+        const mutatedWeights = [];
+        for(var i=0; i < weights.length; i++){
+            let tensor = weights[i];
+            let shape = weights[i].shape;
+            let values = tensor.dataSync().slice();
+            for(let j=0; j < values.length; j++){
+                if(Math.random() < rate){
+                    let w = values[j];
+                    values[j] = w + randomGaussian() * 0.5; //random gaussian
+                }
+            }
+            let newTensor = tf.tensor(values, shape);
+            mutatedWeights[i] = newTensor
+        }
+        this.model.setWeights(mutatedWeights);
+    }
+
     createModel() {
         return tf.tidy(()=>{
             const model = tf.sequential();

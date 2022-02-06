@@ -11,11 +11,7 @@
      * @constructor
      * @export
      */
-    function Runner(outerContainerId, opt_config) {
-        // Singleton
-        if (Runner.instance_) {
-            return Runner.instance_;
-        }
+    function Runner(outerContainerId, img_1,  img_2, icon, container, opt_config) {
         Runner.instance_ = this;
 
         this.outerContainerEl = document.querySelector(outerContainerId);
@@ -64,11 +60,10 @@
         // Images.
         this.images = {};
         this.imagesLoaded = 0;
-
         if (this.isDisabled()) {
             this.setupDisabledRunner();
         } else {
-            this.loadImages();
+            this.loadImages(img_1, img_2, icon, container);
         }
     }
     window['Runner'] = Runner;
@@ -285,47 +280,47 @@
          * Cache the appropriate image sprite from the page and get the sprite sheet
          * definition.
          */
-        loadImages: function () {
+        loadImages: function (img_1, img_2, icon, container) {
             if (IS_HIDPI) {
-                Runner.imageSprite = document.getElementById('offline-resources-2x');
+                Runner.imageSprite = document.getElementById(img_1);
                 this.spriteDef = Runner.spriteDefinition.HDPI;
             } else {
-                Runner.imageSprite = document.getElementById('offline-resources-1x');
+                Runner.imageSprite = document.getElementById(img_2);
                 this.spriteDef = Runner.spriteDefinition.LDPI;
             }
 
             if (Runner.imageSprite.complete) {
-                this.init();
+                this.init(icon, container);
             } else {
                 // If the images are not yet loaded, add a listener.
                 Runner.imageSprite.addEventListener(Runner.events.LOAD,
-                    this.init.bind(this));
+                    this.init.bind(this, icon, container));
             }
         },
 
         /**
          * Load and decode base 64 encoded sounds.
          */
-        loadSounds: function () {
-            if (!IS_IOS) {
-                this.audioContext = new AudioContext();
+        // loadSounds: function () {
+        //     if (!IS_IOS) {
+        //         this.audioContext = new AudioContext();
 
-                var resourceTemplate =
-                    document.getElementById(this.config.RESOURCE_TEMPLATE_ID).content;
+        //         var resourceTemplate =
+        //             document.getElementById(this.config.RESOURCE_TEMPLATE_ID).content;
 
-                for (var sound in Runner.sounds) {
-                    var soundSrc =
-                        resourceTemplate.getElementById(Runner.sounds[sound]).src;
-                    soundSrc = soundSrc.substr(soundSrc.indexOf(',') + 1);
-                    var buffer = decodeBase64ToArrayBuffer(soundSrc);
+        //         for (var sound in Runner.sounds) {
+        //             var soundSrc =
+        //                 resourceTemplate.getElementById(Runner.sounds[sound]).src;
+        //             soundSrc = soundSrc.substr(soundSrc.indexOf(',') + 1);
+        //             var buffer = decodeBase64ToArrayBuffer(soundSrc);
 
-                    // Async, so no guarantee of order in array.
-                    this.audioContext.decodeAudioData(buffer, function (index, audioData) {
-                        this.soundFx[index] = audioData;
-                    }.bind(this, sound));
-                }
-            }
-        },
+        //             // Async, so no guarantee of order in array.
+        //             this.audioContext.decodeAudioData(buffer, function (index, audioData) {
+        //                 this.soundFx[index] = audioData;
+        //             }.bind(this, sound));
+        //         }
+        //     }
+        // },
 
         /**
          * Sets the game speed. Adjust the speed accordingly if on a smaller screen.
@@ -347,16 +342,15 @@
         /**
          * Game initialiser.
          */
-        init: function () {
+        init: function (icon, container) {
             // Hide the static icon.
-            document.querySelector('.' + Runner.classes.ICON).style.visibility =
+            document.querySelector('.' + icon).style.visibility =
                 'hidden';
 
             this.adjustDimensions();
             this.setSpeed();
-
             this.containerEl = document.createElement('div');
-            this.containerEl.className = Runner.classes.CONTAINER;
+            this.containerEl.className = container;
 
             // Player canvas container.
             this.canvas = createCanvas(this.containerEl, this.dimensions.WIDTH,
@@ -673,7 +667,6 @@
                 if (!this.crashed && (Runner.keycodes.JUMP[e.keyCode] ||
                     e.type == Runner.events.TOUCHSTART)) {
                     if (!this.playing) {
-                        this.loadSounds();
                         this.playing = true;
                         this.update();
                         if (window.errorPageController) {
@@ -817,6 +810,7 @@
 
         restart: function () {
             if (!this.raqId) {
+                
                 this.playCount++;
                 this.runningTime = 0;
                 this.playing = true;
@@ -2708,9 +2702,10 @@
 })();
 
 
-function onDocumentLoad() {
-    new Runner('.interstitial-wrapper');
-}
+// function onDocumentLoad() {
+//     let tRex2 = new Runner('.interstitial-wrapper-1');
+//     let tRex1 = new Runner('.interstitial-wrapper');
+// }
 
-document.addEventListener('DOMContentLoaded', onDocumentLoad);
+// document.addEventListener('DOMContentLoaded', onDocumentLoad);
 
